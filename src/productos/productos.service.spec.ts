@@ -1,82 +1,131 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { productos } from './BaseDatos';
+import { PrismaService } from '../prisma/prisma.service';
 import { ProductosService } from './productos.service';
 
 describe('ProductosService', () => {
   let service: ProductosService;
+  const prisma = {
+    producto: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    },
+  };
 
   beforeEach(async () => {
+    jest.resetAllMocks();
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ProductosService],
+      providers: [
+        ProductosService,
+        { provide: PrismaService, useValue: prisma },
+      ],
     }).compile();
 
     service = module.get<ProductosService>(ProductosService);
-    productos.splice(0, productos.length);
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  it('creates and lists products with generated ids', () => {
-    const primero = service.create({
+  it('creates a product', async () => {
+    const dto = {
       nombre: 'Teclado',
       precio: 30,
       descripcion: 'Teclado mecánico',
-    });
-    const segundo = service.create({
-      nombre: 'Mouse',
-      precio: 15,
-      descripcion: 'Mouse inalámbrico',
-    });
+    };
+    const producto = { id: 1, ...dto, stock: 0, categoria: null };
+    prisma.producto.create.mockResolvedValue(producto);
 
-    expect(primero.id).toBe(1);
-    expect(segundo.id).toBe(2);
-    expect(service.findAll()).toEqual([primero, segundo]);
+    await expect(service.create(dto)).resolves.toEqual(producto);
+    expect(prisma.producto.create).toHaveBeenCalledWith({ data: dto });
   });
 
-  it('finds a product by id', () => {
-    const creado = service.create({
+  it('lists products', async () => {
+    const products = [
+      {
+        id: 1,
+        nombre: 'Teclado',
+        precio: 30,
+        descripcion: 'Teclado mecánico',
+        stock: 0,
+        categoria: null,
+      },
+    ];
+    prisma.producto.findMany.mockResolvedValue(products);
+
+    await expect(service.findAll()).resolves.toEqual(products);
+  });
+
+  it('finds a product by id', async () => {
+    const producto = {
+      id: 1,
       nombre: 'Monitor',
       precio: 200,
       descripcion: 'Monitor 27 pulgadas',
-    });
+      stock: 0,
+      categoria: null,
+    };
+    prisma.producto.findUnique.mockResolvedValue(producto);
 
-    expect(service.findOne(creado.id)).toBe(creado);
+    await expect(service.findOne(producto.id)).resolves.toEqual(producto);
+    expect(prisma.producto.findUnique).toHaveBeenCalledWith({
+      where: { id: producto.id },
+    });
   });
 
-  it('updates only the provided product fields', () => {
-    const creado = service.create({
-      nombre: 'Monitor',
-      precio: 200,
-      descripcion: 'Monitor 27 pulgadas',
-    });
-
-    const actualizado = service.update(creado.id, { precio: 180 });
-
-    expect(actualizado).toEqual({
-      id: creado.id,
+  it('updates only the provided product fields', async () => {
+    const producto = {
+      id: 1,
       nombre: 'Monitor',
       precio: 180,
       descripcion: 'Monitor 27 pulgadas',
+      stock: 0,
+      categoria: null,
+    };
+    prisma.producto.update.mockResolvedValue(producto);
+
+    await expect(service.update(producto.id, { precio: 180 })).resolves.toEqual(
+      producto,
+    );
+    expect(prisma.producto.update).toHaveBeenCalledWith({
+      where: { id: producto.id },
+      data: { precio: 180 },
     });
   });
 
-  it('removes a product from the stored list', () => {
-    const creado = service.create({
+  it('removes a product', async () => {
+    const producto = {
+      id: 1,
       nombre: 'Monitor',
       precio: 200,
       descripcion: 'Monitor 27 pulgadas',
-    });
+      stock: 0,
+      categoria: null,
+    };
+    prisma.producto.delete.mockResolvedValue(producto);
 
-    expect(service.remove(creado.id)).toBe(creado);
-    expect(service.findAll()).toEqual([]);
+    await expect(service.remove(producto.id)).resolves.toEqual(producto);
+    expect(prisma.producto.delete).toHaveBeenCalledWith({
+      where: { id: producto.id },
+    });
   });
 
-  it('throws when a product does not exist', () => {
-    expect(() => service.findOne(999)).toThrow(NotFoundException);
-    expect(() => service.update(999, { precio: 1 })).toThrow(NotFoundException);
-    expect(() => service.remove(999)).toThrow(NotFoundException);
+  it('throws when a product does not exist', async () => {
+    const notFound = () => Object.assign(new Error('Record not found'), {
+      code: 'P2025',
+    });
+    prisma.producto.findUnique.mockResolvedValue(null);
+    prisma.producto.update.mockRejectedValue(notFound());
+    prisma.producto.delete.mockRejectedValue(notFound());
+
+    await expect(service.findOne(999)).rejects.toThrow(NotFoundException);
+    await expect(service.update(999, { precio: 1 })).rejects.toThrow(
+      NotFoundException,
+    );
+    await expect(service.remove(999)).rejects.toThrow(NotFoundException);
   });
 });
