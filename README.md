@@ -31,6 +31,24 @@
 $ npm install
 ```
 
+## Prisma and PostgreSQL
+
+Set `DATABASE_URL` in `.env` to the connection string for your PostgreSQL database.
+The Prisma schema and migration history are in `prisma/`.
+
+```bash
+# Generate the Prisma Client
+$ npm run prisma:generate
+
+# Apply migrations during local development
+$ npm run prisma:migrate
+
+# Check migration status
+$ npm run prisma:status
+```
+
+For deployment, apply the checked-in migrations with `npm run prisma:deploy`.
+
 ## Compile and run the project
 
 ```bash

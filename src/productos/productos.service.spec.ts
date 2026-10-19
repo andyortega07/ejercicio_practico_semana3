@@ -115,9 +115,10 @@ describe('ProductosService', () => {
   });
 
   it('throws when a product does not exist', async () => {
-    const notFound = () => Object.assign(new Error('Record not found'), {
-      code: 'P2025',
-    });
+    const notFound = () =>
+      Object.assign(new Error('Record not found'), {
+        code: 'P2025',
+      });
     prisma.producto.findUnique.mockResolvedValue(null);
     prisma.producto.update.mockRejectedValue(notFound());
     prisma.producto.delete.mockRejectedValue(notFound());
