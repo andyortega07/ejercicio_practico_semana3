@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { isMissingPrismaRecord } from '../prisma/prisma-errors';
 
 type Producto = NonNullable<
   Awaited<ReturnType<PrismaService['producto']['findUnique']>>
@@ -54,22 +55,11 @@ export class ProductosService {
     try {
       return await operation();
     } catch (error) {
-      if (isMissingRecordError(error)) {
+      if (isMissingPrismaRecord(error)) {
         throw this.productNotFound(id);
       }
 
       throw error;
     }
   }
-}
-
-function isMissingRecordError(
-  error: unknown,
-): error is Error & { code: string } {
-  return (
-    error instanceof Error &&
-    'code' in error &&
-    typeof error.code === 'string' &&
-    error.code === 'P2025'
-  );
 }

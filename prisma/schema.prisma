@@ -8,11 +8,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Producto {
-  id     Int    @id @default(autoincrement())
-  nombre String
-  precio Float
+model producto {
+  id          Int               @id @default(autoincrement())
+  nombre      String
+  precio      Float
   descripcion String
-  stock Int @default(0)
-  categoria String?
+  stock       Int               @default(0)
+  categoria   String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  pedidoproductos pedidoproducto[]
+
+  @@map("Producto")
+}
+
+model pedidoproducto {
+  id         Int      @id @default(autoincrement())
+  idpedido   Int
+  idproducto Int
+
+  pedido   pedido   @relation(fields: [idpedido], references: [id])
+  producto producto @relation(fields: [idproducto], references: [id])
+}
+
+model pedido {
+  id              Int               @id @default(autoincrement())
+  estado          String
+  cantidad        Int
+  pedidoProductos pedidoproducto[]
 }
