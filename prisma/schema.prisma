@@ -17,23 +17,28 @@ model producto {
   categoria   String?
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
-  pedidoproductos pedidoproducto[]
+  pedidoproductos PedidoProducto[]
 
   @@map("Producto")
 }
 
-model pedidoproducto {
+model PedidoProducto {
   id         Int      @id @default(autoincrement())
   idpedido   Int
   idproducto Int
 
   pedido   pedido   @relation(fields: [idpedido], references: [id])
   producto producto @relation(fields: [idproducto], references: [id])
+
+  @@map("pedidoproducto")
 }
 
 model pedido {
   id              Int               @id @default(autoincrement())
-  estado          String
+  idcliente       Int
+  estado          String            @default("Pendiente")
   cantidad        Int
-  pedidoProductos pedidoproducto[]
+  pedidoProductos PedidoProducto[]
+
+  @@index([idcliente, estado])
 }

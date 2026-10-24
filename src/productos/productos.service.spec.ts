@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProductosService } from './productos.service';
 
@@ -41,7 +45,9 @@ describe('ProductosService', () => {
     prisma.producto.create.mockResolvedValue(producto);
 
     await expect(service.create(dto)).resolves.toEqual(producto);
-    expect(prisma.producto.create).toHaveBeenCalledWith({ data: dto });
+    expect(prisma.producto.create).toHaveBeenCalledWith({
+      data: { ...dto, stock: 0, categoria: null },
+    });
   });
 
   it('lists products', async () => {
@@ -128,5 +134,30 @@ describe('ProductosService', () => {
       NotFoundException,
     );
     await expect(service.remove(999)).rejects.toThrow(NotFoundException);
+  });
+
+  it('rejects invalid stock and unexpected fields', async () => {
+    await expect(
+      service.create({
+        nombre: 'Teclado',
+        precio: 30,
+        descripcion: 'Mecánico',
+        stock: -1,
+      }),
+    ).rejects.toThrow(UnprocessableEntityException);
+    await expect(service.update(1, { stock: -3 })).rejects.toThrow(
+      UnprocessableEntityException,
+    );
+    await expect(service.update(1, { id: 2 } as never)).rejects.toThrow(
+      UnprocessableEntityException,
+    );
+    expect(prisma.producto.create).not.toHaveBeenCalled();
+  });
+
+  it('reports referenced products as conflict on delete', async () => {
+    prisma.producto.delete.mockRejectedValue(
+      Object.assign(new Error('FK'), { code: 'P2003' }),
+    );
+    await expect(service.remove(1)).rejects.toThrow(ConflictException);
   });
 });

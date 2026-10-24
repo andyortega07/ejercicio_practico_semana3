@@ -49,6 +49,52 @@ $ npm run prisma:status
 
 For deployment, apply the checked-in migrations with `npm run prisma:deploy`.
 
+## Pedidos (Postman)
+
+Inicia la API con `npm run start:dev`. En Postman usa `Content-Type: application/json`.
+
+Primero crea un producto con `POST http://localhost:3000/productos`:
+
+```json
+{
+  "nombre": "Teclado",
+  "precio": 30,
+  "descripcion": "Mecánico",
+  "stock": 5
+}
+```
+
+Con el ID obtenido, crea un pedido con `POST http://localhost:3000/pedido`:
+
+```json
+{
+  "idcliente": 1,
+  "idproducto": 1,
+  "cantidad": 2
+}
+```
+
+El pedido inicia como `Pendiente` y descuenta la cantidad del stock en la misma transacción. Producto inexistente o inventario insuficiente responden `422`; un cliente con otro pedido pendiente responde `409`. Los cuerpos inválidos también responden `422`.
+
+Endpoints públicos:
+
+| Método | Ruta | Descripción |
+| --- | --- | --- |
+| POST | `/productos` | Crear producto |
+| GET | `/productos` | Listar productos |
+| GET | `/productos/:id` | Consultar producto |
+| PATCH | `/productos/:id` | Actualizar producto |
+| DELETE | `/productos/:id` | Eliminar producto sin pedidos asociados |
+| POST | `/pedido` | Crear pedido pendiente |
+| GET | `/pedido` | Listar pedidos con productos |
+| GET | `/pedido/:id` | Consultar pedido con productos |
+| PATCH | `/pedido/:id` | Cambiar de `Pendiente` a `entregado` o `negado` |
+| DELETE | `/pedido/:id` | Eliminar pedido finalizado |
+
+Para cambiar el estado: `PATCH http://localhost:3000/pedido/1` con `{ "estado": "entregado" }` o `{ "estado": "negado" }`. Un pedido negado devuelve la cantidad al inventario. Los pedidos finalizados no pueden volver a estado pendiente. Para eliminar uno pendiente, primero niégalo o entrégalo. El modelo Prisma `PedidoProducto` es la entidad intermedia entre pedido y producto y se almacena en la tabla existente `pedidoproducto`. `/pedido-producto` no es una ruta pública: la relación se administra desde `/pedido` para proteger las reglas de inventario.
+
+Después de incorporar nuevas migraciones, ejecuta `npm run prisma:deploy` antes de iniciar la API. La migración de índice único garantiza que tampoco puedan coexistir dos pedidos pendientes del mismo cliente bajo solicitudes simultáneas.
+
 ## Compile and run the project
 
 ```bash

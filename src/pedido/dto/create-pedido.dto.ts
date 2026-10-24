@@ -1,5 +1,6 @@
 export class CreatePedidoDto {
-
-  estado!: string;
+  idcliente!: number;
+  idproducto!: number;
   cantidad!: number;
+  estado?: string;
 }
