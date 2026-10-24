@@ -1,0 +1,1012 @@
+{
+  "inicio": "2026-10-24T03:08:06.110Z",
+  "base": "http://localhost:3000",
+  "casos": [
+    {
+      "nombre": "Caso 1: lista inicial",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "GET",
+            "ruta": "/reservas"
+          },
+          "respuesta": {
+            "estado": 200,
+            "location": null,
+            "texto": "[{\"id\":1,\"laboratorio\":\"Lab 1\",\"docente\":\"Marta Loja\",\"hora\":8},{\"id\":2,\"laboratorio\":\"Lab 2\",\"docente\":\"Luis Paredes\",\"hora\":10}]",
+            "body": [
+              {
+                "id": 1,
+                "laboratorio": "Lab 1",
+                "docente": "Marta Loja",
+                "hora": 8
+              },
+              {
+                "id": 2,
+                "laboratorio": "Lab 2",
+                "docente": "Luis Paredes",
+                "hora": 10
+              }
+            ]
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Caso 2: filtro exacto Lab 2",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "GET",
+            "ruta": "/reservas?laboratorio=Lab%202"
+          },
+          "respuesta": {
+            "estado": 200,
+            "location": null,
+            "texto": "[{\"id\":2,\"laboratorio\":\"Lab 2\",\"docente\":\"Luis Paredes\",\"hora\":10}]",
+            "body": [
+              {
+                "id": 2,
+                "laboratorio": "Lab 2",
+                "docente": "Luis Paredes",
+                "hora": 10
+              }
+            ]
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Caso 3: reserva de Marta Loja",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "GET",
+            "ruta": "/reservas/1"
+          },
+          "respuesta": {
+            "estado": 200,
+            "location": null,
+            "texto": "{\"id\":1,\"laboratorio\":\"Lab 1\",\"docente\":\"Marta Loja\",\"hora\":8}",
+            "body": {
+              "id": 1,
+              "laboratorio": "Lab 1",
+              "docente": "Marta Loja",
+              "hora": 8
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Caso 4: reserva 9 inexistente",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "GET",
+            "ruta": "/reservas/9"
+          },
+          "respuesta": {
+            "estado": 404,
+            "location": null,
+            "texto": "{\"message\":\"No existe la reserva 9\",\"error\":\"Not Found\",\"statusCode\":404}",
+            "body": {
+              "message": "No existe la reserva 9",
+              "error": "Not Found",
+              "statusCode": 404
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Caso 5: crear reserva 3 con Location",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": {
+              "docente": "Rosa Ortiz",
+              "laboratorio": "Lab 3",
+              "hora": 14
+            }
+          },
+          "respuesta": {
+            "estado": 201,
+            "location": "/reservas/3",
+            "texto": "{\"id\":3,\"laboratorio\":\"Lab 3\",\"docente\":\"Rosa Ortiz\",\"hora\":14}",
+            "body": {
+              "id": 3,
+              "laboratorio": "Lab 3",
+              "docente": "Rosa Ortiz",
+              "hora": 14
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Caso 6: hora ausente",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": {
+              "docente": "Rosa Ortiz",
+              "laboratorio": "Lab 3"
+            }
+          },
+          "respuesta": {
+            "estado": 400,
+            "location": null,
+            "texto": "{\"message\":\"La hora debe ser un número entero\",\"error\":\"Bad Request\",\"statusCode\":400}",
+            "body": {
+              "message": "La hora debe ser un número entero",
+              "error": "Bad Request",
+              "statusCode": 400
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Caso 7: laboratorio ocupado",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": {
+              "docente": "Ana Paz",
+              "laboratorio": "Lab 1",
+              "hora": 8
+            }
+          },
+          "respuesta": {
+            "estado": 409,
+            "location": null,
+            "texto": "{\"message\":\"Lab 1 ya está reservado a las 8:00\",\"error\":\"Conflict\",\"statusCode\":409}",
+            "body": {
+              "message": "Lab 1 ya está reservado a las 8:00",
+              "error": "Conflict",
+              "statusCode": 409
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Caso 8: laboratorio inexistente",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": {
+              "docente": "Ana Paz",
+              "laboratorio": "Lab 9",
+              "hora": 8
+            }
+          },
+          "respuesta": {
+            "estado": 422,
+            "location": null,
+            "texto": "{\"message\":\"El laboratorio \\\"Lab 9\\\" no existe\",\"error\":\"Unprocessable Entity\",\"statusCode\":422}",
+            "body": {
+              "message": "El laboratorio \"Lab 9\" no existe",
+              "error": "Unprocessable Entity",
+              "statusCode": 422
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Caso 9: DELETE 204 vacío y GET 404 de la misma reserva",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "DELETE",
+            "ruta": "/reservas/3"
+          },
+          "respuesta": {
+            "estado": 204,
+            "location": null,
+            "texto": "",
+            "body": null
+          }
+        },
+        {
+          "solicitud": {
+            "metodo": "GET",
+            "ruta": "/reservas/3"
+          },
+          "respuesta": {
+            "estado": 404,
+            "location": null,
+            "texto": "{\"message\":\"No existe la reserva 3\",\"error\":\"Not Found\",\"statusCode\":404}",
+            "body": {
+              "message": "No existe la reserva 3",
+              "error": "Not Found",
+              "statusCode": 404
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: docente vacío",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": {
+              "docente": "",
+              "laboratorio": "Lab 3",
+              "hora": 14
+            }
+          },
+          "respuesta": {
+            "estado": 400,
+            "location": null,
+            "texto": "{\"message\":\"El docente es obligatorio\",\"error\":\"Bad Request\",\"statusCode\":400}",
+            "body": {
+              "message": "El docente es obligatorio",
+              "error": "Bad Request",
+              "statusCode": 400
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: docente con espacios",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": {
+              "docente": "   ",
+              "laboratorio": "Lab 3",
+              "hora": 14
+            }
+          },
+          "respuesta": {
+            "estado": 400,
+            "location": null,
+            "texto": "{\"message\":\"El docente es obligatorio\",\"error\":\"Bad Request\",\"statusCode\":400}",
+            "body": {
+              "message": "El docente es obligatorio",
+              "error": "Bad Request",
+              "statusCode": 400
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: docente de tipo incorrecto",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": {
+              "docente": 7,
+              "laboratorio": "Lab 3",
+              "hora": 14
+            }
+          },
+          "respuesta": {
+            "estado": 400,
+            "location": null,
+            "texto": "{\"message\":\"El docente es obligatorio\",\"error\":\"Bad Request\",\"statusCode\":400}",
+            "body": {
+              "message": "El docente es obligatorio",
+              "error": "Bad Request",
+              "statusCode": 400
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: laboratorio vacío",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": {
+              "docente": "Rosa Ortiz",
+              "laboratorio": "",
+              "hora": 14
+            }
+          },
+          "respuesta": {
+            "estado": 400,
+            "location": null,
+            "texto": "{\"message\":\"El laboratorio es obligatorio\",\"error\":\"Bad Request\",\"statusCode\":400}",
+            "body": {
+              "message": "El laboratorio es obligatorio",
+              "error": "Bad Request",
+              "statusCode": 400
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: laboratorio con espacios",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": {
+              "docente": "Rosa Ortiz",
+              "laboratorio": "  ",
+              "hora": 14
+            }
+          },
+          "respuesta": {
+            "estado": 400,
+            "location": null,
+            "texto": "{\"message\":\"El laboratorio es obligatorio\",\"error\":\"Bad Request\",\"statusCode\":400}",
+            "body": {
+              "message": "El laboratorio es obligatorio",
+              "error": "Bad Request",
+              "statusCode": 400
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: laboratorio de tipo incorrecto",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": {
+              "docente": "Rosa Ortiz",
+              "laboratorio": null,
+              "hora": 14
+            }
+          },
+          "respuesta": {
+            "estado": 400,
+            "location": null,
+            "texto": "{\"message\":\"El laboratorio es obligatorio\",\"error\":\"Bad Request\",\"statusCode\":400}",
+            "body": {
+              "message": "El laboratorio es obligatorio",
+              "error": "Bad Request",
+              "statusCode": 400
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: hora decimal",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": {
+              "docente": "Rosa Ortiz",
+              "laboratorio": "Lab 3",
+              "hora": 14.5
+            }
+          },
+          "respuesta": {
+            "estado": 400,
+            "location": null,
+            "texto": "{\"message\":\"La hora debe ser un número entero\",\"error\":\"Bad Request\",\"statusCode\":400}",
+            "body": {
+              "message": "La hora debe ser un número entero",
+              "error": "Bad Request",
+              "statusCode": 400
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: hora como texto",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": {
+              "docente": "Rosa Ortiz",
+              "laboratorio": "Lab 3",
+              "hora": "14"
+            }
+          },
+          "respuesta": {
+            "estado": 400,
+            "location": null,
+            "texto": "{\"message\":\"La hora debe ser un número entero\",\"error\":\"Bad Request\",\"statusCode\":400}",
+            "body": {
+              "message": "La hora debe ser un número entero",
+              "error": "Bad Request",
+              "statusCode": 400
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: hora nula",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": {
+              "docente": "Rosa Ortiz",
+              "laboratorio": "Lab 3",
+              "hora": null
+            }
+          },
+          "respuesta": {
+            "estado": 400,
+            "location": null,
+            "texto": "{\"message\":\"La hora debe ser un número entero\",\"error\":\"Bad Request\",\"statusCode\":400}",
+            "body": {
+              "message": "La hora debe ser un número entero",
+              "error": "Bad Request",
+              "statusCode": 400
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: hora 6",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": {
+              "docente": "Rosa Ortiz",
+              "laboratorio": "Lab 3",
+              "hora": 6
+            }
+          },
+          "respuesta": {
+            "estado": 422,
+            "location": null,
+            "texto": "{\"message\":\"Solo se reserva entre las 7:00 y las 18:00\",\"error\":\"Unprocessable Entity\",\"statusCode\":422}",
+            "body": {
+              "message": "Solo se reserva entre las 7:00 y las 18:00",
+              "error": "Unprocessable Entity",
+              "statusCode": 422
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: hora 19",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": {
+              "docente": "Rosa Ortiz",
+              "laboratorio": "Lab 3",
+              "hora": 19
+            }
+          },
+          "respuesta": {
+            "estado": 422,
+            "location": null,
+            "texto": "{\"message\":\"Solo se reserva entre las 7:00 y las 18:00\",\"error\":\"Unprocessable Entity\",\"statusCode\":422}",
+            "body": {
+              "message": "Solo se reserva entre las 7:00 y las 18:00",
+              "error": "Unprocessable Entity",
+              "statusCode": 422
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: prioridad docente",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": {
+              "docente": "",
+              "laboratorio": "",
+              "hora": "14"
+            }
+          },
+          "respuesta": {
+            "estado": 400,
+            "location": null,
+            "texto": "{\"message\":\"El docente es obligatorio\",\"error\":\"Bad Request\",\"statusCode\":400}",
+            "body": {
+              "message": "El docente es obligatorio",
+              "error": "Bad Request",
+              "statusCode": 400
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: prioridad laboratorio",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": {
+              "docente": "Ana Paz",
+              "laboratorio": "",
+              "hora": "14"
+            }
+          },
+          "respuesta": {
+            "estado": 400,
+            "location": null,
+            "texto": "{\"message\":\"El laboratorio es obligatorio\",\"error\":\"Bad Request\",\"statusCode\":400}",
+            "body": {
+              "message": "El laboratorio es obligatorio",
+              "error": "Bad Request",
+              "statusCode": 400
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: prioridad tipo de hora",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": {
+              "docente": "Rosa Ortiz",
+              "laboratorio": "Lab 9",
+              "hora": "14"
+            }
+          },
+          "respuesta": {
+            "estado": 400,
+            "location": null,
+            "texto": "{\"message\":\"La hora debe ser un número entero\",\"error\":\"Bad Request\",\"statusCode\":400}",
+            "body": {
+              "message": "La hora debe ser un número entero",
+              "error": "Bad Request",
+              "statusCode": 400
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: prioridad existencia del laboratorio",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": {
+              "docente": "Rosa Ortiz",
+              "laboratorio": "Lab 9",
+              "hora": 6
+            }
+          },
+          "respuesta": {
+            "estado": 422,
+            "location": null,
+            "texto": "{\"message\":\"El laboratorio \\\"Lab 9\\\" no existe\",\"error\":\"Unprocessable Entity\",\"statusCode\":422}",
+            "body": {
+              "message": "El laboratorio \"Lab 9\" no existe",
+              "error": "Unprocessable Entity",
+              "statusCode": 422
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: body ausente",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas"
+          },
+          "respuesta": {
+            "estado": 400,
+            "location": null,
+            "texto": "{\"message\":\"El docente es obligatorio\",\"error\":\"Bad Request\",\"statusCode\":400}",
+            "body": {
+              "message": "El docente es obligatorio",
+              "error": "Bad Request",
+              "statusCode": 400
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: body nulo",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": null
+          },
+          "respuesta": {
+            "estado": 400,
+            "location": null,
+            "texto": "{\"message\":\"El docente es obligatorio\",\"error\":\"Bad Request\",\"statusCode\":400}",
+            "body": {
+              "message": "El docente es obligatorio",
+              "error": "Bad Request",
+              "statusCode": 400
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: body de texto",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": "texto"
+          },
+          "respuesta": {
+            "estado": 400,
+            "location": null,
+            "texto": "{\"message\":\"El docente es obligatorio\",\"error\":\"Bad Request\",\"statusCode\":400}",
+            "body": {
+              "message": "El docente es obligatorio",
+              "error": "Bad Request",
+              "statusCode": 400
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: body numérico",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": 14
+          },
+          "respuesta": {
+            "estado": 400,
+            "location": null,
+            "texto": "{\"message\":\"El docente es obligatorio\",\"error\":\"Bad Request\",\"statusCode\":400}",
+            "body": {
+              "message": "El docente es obligatorio",
+              "error": "Bad Request",
+              "statusCode": 400
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: body booleano",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": true
+          },
+          "respuesta": {
+            "estado": 400,
+            "location": null,
+            "texto": "{\"message\":\"El docente es obligatorio\",\"error\":\"Bad Request\",\"statusCode\":400}",
+            "body": {
+              "message": "El docente es obligatorio",
+              "error": "Bad Request",
+              "statusCode": 400
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: body arreglo",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": []
+          },
+          "respuesta": {
+            "estado": 400,
+            "location": null,
+            "texto": "{\"message\":\"El docente es obligatorio\",\"error\":\"Bad Request\",\"statusCode\":400}",
+            "body": {
+              "message": "El docente es obligatorio",
+              "error": "Bad Request",
+              "statusCode": 400
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: GET con id abc",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "GET",
+            "ruta": "/reservas/abc"
+          },
+          "respuesta": {
+            "estado": 400,
+            "location": null,
+            "texto": "{\"message\":\"Validation failed (numeric string is expected)\",\"error\":\"Bad Request\",\"statusCode\":400}",
+            "body": {
+              "message": "Validation failed (numeric string is expected)",
+              "error": "Bad Request",
+              "statusCode": 400
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: DELETE con id abc",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "DELETE",
+            "ruta": "/reservas/abc"
+          },
+          "respuesta": {
+            "estado": 400,
+            "location": null,
+            "texto": "{\"message\":\"Validation failed (numeric string is expected)\",\"error\":\"Bad Request\",\"statusCode\":400}",
+            "body": {
+              "message": "Validation failed (numeric string is expected)",
+              "error": "Bad Request",
+              "statusCode": 400
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: DELETE inexistente",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "DELETE",
+            "ruta": "/reservas/9"
+          },
+          "respuesta": {
+            "estado": 404,
+            "location": null,
+            "texto": "{\"message\":\"No existe la reserva 9\",\"error\":\"Not Found\",\"statusCode\":404}",
+            "body": {
+              "message": "No existe la reserva 9",
+              "error": "Not Found",
+              "statusCode": 404
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: filtro sin coincidencias y filtro vacío",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "GET",
+            "ruta": "/reservas?laboratorio=Lab%209"
+          },
+          "respuesta": {
+            "estado": 200,
+            "location": null,
+            "texto": "[]",
+            "body": []
+          }
+        },
+        {
+          "solicitud": {
+            "metodo": "GET",
+            "ruta": "/reservas?laboratorio="
+          },
+          "respuesta": {
+            "estado": 200,
+            "location": null,
+            "texto": "[]",
+            "body": []
+          }
+        },
+        {
+          "solicitud": {
+            "metodo": "GET",
+            "ruta": "/reservas?laboratorio=lab%202"
+          },
+          "respuesta": {
+            "estado": 200,
+            "location": null,
+            "texto": "[]",
+            "body": []
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: los errores no guardaron reservas",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "GET",
+            "ruta": "/reservas"
+          },
+          "respuesta": {
+            "estado": 200,
+            "location": null,
+            "texto": "[{\"id\":1,\"laboratorio\":\"Lab 1\",\"docente\":\"Marta Loja\",\"hora\":8},{\"id\":2,\"laboratorio\":\"Lab 2\",\"docente\":\"Luis Paredes\",\"hora\":10}]",
+            "body": [
+              {
+                "id": 1,
+                "laboratorio": "Lab 1",
+                "docente": "Marta Loja",
+                "hora": 8
+              },
+              {
+                "id": 2,
+                "laboratorio": "Lab 2",
+                "docente": "Luis Paredes",
+                "hora": 10
+              }
+            ]
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: contador sin saltos ni reutilización; id del cliente ignorado",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": {
+              "docente": "Rosa Ortiz",
+              "laboratorio": "Lab 3",
+              "hora": 14,
+              "id": 999,
+              "extra": "ignorar"
+            }
+          },
+          "respuesta": {
+            "estado": 201,
+            "location": "/reservas/4",
+            "texto": "{\"id\":4,\"laboratorio\":\"Lab 3\",\"docente\":\"Rosa Ortiz\",\"hora\":14}",
+            "body": {
+              "id": 4,
+              "laboratorio": "Lab 3",
+              "docente": "Rosa Ortiz",
+              "hora": 14
+            }
+          }
+        }
+      ],
+      "correcto": true
+    },
+    {
+      "nombre": "Adicional: horas límite 7 y 18",
+      "solicitudes": [
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": {
+              "docente": "Rosa Ortiz",
+              "laboratorio": "Lab 3",
+              "hora": 7
+            }
+          },
+          "respuesta": {
+            "estado": 201,
+            "location": "/reservas/5",
+            "texto": "{\"id\":5,\"laboratorio\":\"Lab 3\",\"docente\":\"Rosa Ortiz\",\"hora\":7}",
+            "body": {
+              "id": 5,
+              "laboratorio": "Lab 3",
+              "docente": "Rosa Ortiz",
+              "hora": 7
+            }
+          }
+        },
+        {
+          "solicitud": {
+            "metodo": "POST",
+            "ruta": "/reservas",
+            "body": {
+              "docente": "Rosa Ortiz",
+              "laboratorio": "Lab 3",
+              "hora": 18
+            }
+          },
+          "respuesta": {
+            "estado": 201,
+            "location": "/reservas/6",
+            "texto": "{\"id\":6,\"laboratorio\":\"Lab 3\",\"docente\":\"Rosa Ortiz\",\"hora\":18}",
+            "body": {
+              "id": 6,
+              "laboratorio": "Lab 3",
+              "docente": "Rosa Ortiz",
+              "hora": 18
+            }
+          }
+        }
+      ],
+      "correcto": true
+    }
+  ],
+  "correcto": true,
+  "fin": "2026-10-24T03:08:06.194Z"
+}

@@ -33,6 +33,12 @@ $ npm install
 
 ## Prisma and PostgreSQL
 
+`npm install` genera el cliente Prisma automáticamente. La URL de conexión se
+declara en `prisma/schema.prisma` mediante `DATABASE_URL`; no hace falta definirla
+para generar el cliente ni para usar las reservas en memoria. Si está definida,
+Prisma comprueba la conexión al arrancar. Productos y pedidos siguen necesitando
+PostgreSQL para sus operaciones.
+
 Set `DATABASE_URL` in `.env` to the connection string for your PostgreSQL database.
 The Prisma schema and migration history are in `prisma/`.
 
@@ -107,6 +113,51 @@ $ npm run start:dev
 # production mode
 $ npm run start:prod
 ```
+
+## Reservas del laboratorio
+
+Las reservas se guardan en un arreglo del controlador y se reinician con la
+aplicación. La API usa Express y no tiene prefijo global ni interceptores que
+envuelvan las respuestas.
+
+| Método | Ruta | Resultado |
+| --- | --- | --- |
+| GET | `http://localhost:3000/reservas` | 200, todas las reservas |
+| GET | `http://localhost:3000/reservas?laboratorio=Lab%202` | 200, coincidencia exacta |
+| GET | `http://localhost:3000/reservas/:id` | 200, reserva; 404 si no existe |
+| POST | `http://localhost:3000/reservas` | 201, objeto y cabecera `Location` |
+| DELETE | `http://localhost:3000/reservas/:id` | 204 sin cuerpo; 404 si no existe |
+
+Ejemplo de POST:
+
+```json
+{ "docente": "Rosa Ortiz", "laboratorio": "Lab 3", "hora": 14 }
+```
+
+El controlador valida primero docente, laboratorio y tipo de hora; después,
+existencia del laboratorio, rango horario y disponibilidad. El lector JSON
+permite valores nulos o primitivos para que también reciban el mensaje de datos
+incompletos del controlador. El ID lo asigna el servidor después de validar.
+
+Para reproducir las pruebas, compila y arranca una instancia limpia en una terminal:
+
+```bash
+npm install
+npm run build
+npm run start
+```
+
+En otra terminal, sin hacer solicitudes previas ni reiniciar durante la prueba:
+
+```bash
+node test/reservas-http.cjs
+```
+
+La prueba ejecuta los nueve casos obligatorios en orden y luego los casos
+adicionales. Guarda las solicitudes y respuestas reales en
+`test/evidencia-reservas.json`; el caso 9 contiene juntos el DELETE y el GET
+posterior. Las creaciones adicionales dejan reservas en memoria, por lo que
+debes reiniciar la aplicación antes de repetir la prueba completa.
 
 ## Run tests
 
